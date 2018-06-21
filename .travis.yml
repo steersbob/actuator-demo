@@ -1,10 +1,40 @@
+sudo: required
 language: python
+python: '3.6'
 
-python:
-  - "3.6"
+services:
+  - docker
 
-install:
-  - pip install tox
+env:
+  global:
+    # Both docker and github repo names are case sensitive
+    - DOCKER_REPO=kargathia/actuator-demo
+    - GITHUB_REPO=steersbob/actuator-demo
 
-script:
-  - tox
+install: pip install tox brewblox-tools~=0.2.0
+
+script: tox
+
+before_deploy:
+  bbt-distcopy .tox/dist/ amd_docker/pkg/ arm_docker/pkg/
+  && docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+  && docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+deploy:
+  # Deploy branch to Docker Hub on any push to an upstream development branch
+  - provider: script
+    script:
+      bbt-deploy-docker
+      --image amd_docker
+      --name "$DOCKER_REPO"
+      --tags "$TRAVIS_BRANCH"
+      &&
+      bbt-deploy-docker
+      --image arm_docker
+      --name "$DOCKER_REPO"
+      --tags rpi-$TRAVIS_BRANCH
+    skip_cleanup: true
+    on:
+      tags: false
+      repo: $GITHUB_REPO
+      all_branches: true

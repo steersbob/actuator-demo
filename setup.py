@@ -1,15 +1,12 @@
-from setuptools import setup, find_packages
-
-project_name = 'YOUR-PACKAGE'
-package_name = 'YOUR_PACKAGE'
+from setuptools import find_packages, setup
 
 setup(
-    name=project_name,
+    name='actuator-demo',
     version='0.1',
     long_description=open('README.md').read(),
-    url='YOUR_REPOSITORY',
-    author='YOUR NAME',
-    author_email='YOU@PROVIDER.com',
+    url='https://github.com/steersbob/actuator-demo',
+    author='Bob Steers',
+    author_email='steers.bob@gmail.com',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -20,7 +17,8 @@ setup(
     keywords='brewing brewpi brewblox embedded plugin service',
     packages=find_packages(exclude=['test']),
     install_requires=[
-        'brewblox-service~=0.5'
+        'brewblox-service~=0.10',
+        'brewblox-devcon-spark',
     ],
     python_requires='>=3.6',
     extras_require={'dev': ['tox', 'pipenv']}
