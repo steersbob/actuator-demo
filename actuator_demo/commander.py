@@ -24,11 +24,12 @@ def subscribe(app: web.Application, exchange_name: str, routing: str):
         routing: str,
         message: dict
     ):
-        if message['buttons']['a'] > 0:
-            await send_command(app, True)
-
-        if message['buttons']['b'] > 0:
-            await send_command(app, False)
+        await send_command(
+            app,
+            red=message['left_trigger'] * 255,
+            green=message['right_trigger'] * 255,
+            blue=0
+        )
 
     events.get_listener(app).subscribe(
         exchange_name=exchange_name,
@@ -37,8 +38,11 @@ def subscribe(app: web.Application, exchange_name: str, routing: str):
     )
 
 
-async def send_command(app: web.Application, enable: bool):
-    cmd = str(int(bool(enable)))  # True = '1', False = '0'
+async def send_command(app: web.Application, red: int, green: int, blue: int):
+    def limit(v):
+        return int(min(abs(v), 255))
+
+    cmd = f'{limit(red)} {limit(green)} {limit(blue)}'
     await communication.get_conduit(app).write(cmd)
 
 
@@ -61,14 +65,24 @@ async def do_command(request: web.Request) -> web.Response:
         schema:
             type: object
             properties:
-                enable:
-                    type: bool
-                    example: true
+                red:
+                    type: int
+                    example: 100
+                green:
+                    type: int
+                    example: 100
+                blue:
+                    type: int
+                    example: 100
     """
     args = await request.json()
-    enable = args['enable']
 
-    await send_command(request.app, enable)
+    await send_command(
+        request.app,
+        args.get('red', 0),
+        args.get('green', 0),
+        args.get('blue', 0)
+    )
     return web.Response()
 
 
