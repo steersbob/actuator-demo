@@ -26,9 +26,10 @@ def subscribe(app: web.Application, exchange_name: str, routing: str):
     ):
         await send_command(
             app,
-            red=message['left_trigger'] * 255,
-            green=message['right_trigger'] * 255,
-            blue=0
+            message['left_trigger'] * 255,
+            message['right_trigger'] * 255,
+            0,
+            message['buttons']['a']
         )
 
     events.get_listener(app).subscribe(
@@ -38,11 +39,11 @@ def subscribe(app: web.Application, exchange_name: str, routing: str):
     )
 
 
-async def send_command(app: web.Application, red: int, green: int, blue: int):
+async def send_command(app: web.Application, *args):
     def limit(v):
         return int(min(abs(v), 255))
 
-    cmd = f'{limit(red)} {limit(green)} {limit(blue)}'
+    cmd = ','.join([str(limit(a)) for a in args])
     await communication.get_conduit(app).write(cmd)
 
 
@@ -74,6 +75,9 @@ async def do_command(request: web.Request) -> web.Response:
                 blue:
                     type: int
                     example: 100
+                led:
+                    type: int
+                    example: 1
     """
     args = await request.json()
 
@@ -81,7 +85,8 @@ async def do_command(request: web.Request) -> web.Response:
         request.app,
         args.get('red', 0),
         args.get('green', 0),
-        args.get('blue', 0)
+        args.get('blue', 0),
+        args.get('led', 0)
     )
     return web.Response()
 
