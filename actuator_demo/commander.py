@@ -29,7 +29,8 @@ def subscribe(app: web.Application, exchange_name: str, routing: str):
             message['left_trigger'] * 255,
             message['right_trigger'] * 255,
             0,
-            message['buttons']['a']
+            message['buttons']['a'],
+            message['buttons']['b']
         )
 
     events.get_listener(app).subscribe(
@@ -75,7 +76,10 @@ async def do_command(request: web.Request) -> web.Response:
                 blue:
                     type: int
                     example: 100
-                led:
+                led1:
+                    type: int
+                    example: 1
+                led2:
                     type: int
                     example: 1
     """
@@ -86,7 +90,8 @@ async def do_command(request: web.Request) -> web.Response:
         args.get('red', 0),
         args.get('green', 0),
         args.get('blue', 0),
-        args.get('led', 0)
+        args.get('led1', 0),
+        args.get('led2', 0)
     )
     return web.Response()
 
