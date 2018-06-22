@@ -26,11 +26,11 @@ def subscribe(app: web.Application, exchange_name: str, routing: str):
     ):
         await send_command(
             app,
+            message['_id'],
             message['left_trigger'] * 255,
             message['right_trigger'] * 255,
-            0,
-            message['buttons']['a'],
-            message['buttons']['b']
+            message['left_stick']['y'] * 255,
+            message['buttons']['a']
         )
 
     events.get_listener(app).subscribe(
@@ -67,6 +67,9 @@ async def do_command(request: web.Request) -> web.Response:
         schema:
             type: object
             properties:
+                id:
+                    type: int
+                    example: 0
                 red:
                     type: int
                     example: 100
@@ -76,10 +79,7 @@ async def do_command(request: web.Request) -> web.Response:
                 blue:
                     type: int
                     example: 100
-                led1:
-                    type: int
-                    example: 1
-                led2:
+                actuator:
                     type: int
                     example: 1
     """
@@ -87,11 +87,11 @@ async def do_command(request: web.Request) -> web.Response:
 
     await send_command(
         request.app,
+        args.get('id', 0),
         args.get('red', 0),
         args.get('green', 0),
         args.get('blue', 0),
-        args.get('led1', 0),
-        args.get('led2', 0)
+        args.get('actuator', 0)
     )
     return web.Response()
 
