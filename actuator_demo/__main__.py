@@ -33,7 +33,7 @@ def main():
     commander.subscribe(
         app,
         app['config']['broadcast_exchange'],
-        routing='game.#'
+        routing='#'
     )
 
     service.furnish(app)
